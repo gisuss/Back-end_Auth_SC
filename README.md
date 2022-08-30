@@ -7,58 +7,61 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## Requisitos para correr el proyecto
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Contar con un entorno de desarrollo de PHP y MySQL como [Xampp](https://www.apachefriends.org/es/index.html).
+- Es necesario tener en el sistema operativo [composer de manera global](https://www.youtube.com/watch?v=lPabQsgHvu0).
+- Tener instalado y configurado **[GIT](https://www.youtube.com/watch?v=wHh3IgJvXcE)**.
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+## 1. Clonar el repositorio del proyecto en Laravel
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Para clonar el proyecto abre una terminal o consola de comandos y escribe la siguiente nomenclatura:
+```bash
+git clone https://github.com/gisuss/Back-end_Auth_SC.git
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 2. Instalar dependencias del proyecto
 
-## Laravel Sponsors
+Cuando guardas tu proyecto Laravel en un repositorio GIT, en el archivo **.gitignore** se excluye la carpeta vendor que es donde están las librerías que usa tu proyecto, es por eso que se debe correr en la terminal una instrucción que tome del archivo **composer.json** todas las referencias de las librerías que deben estar instaladas en tu proyecto.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Ingresa desde la terminal a la carpeta del proyecto y escribe:
+```bash
+composer install
+```
+Este comando instalará todas las librerías que están declaradas para el proyecto.
 
-### Premium Partners
+### 3. Generar archivo .env
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+Por seguridad el archivo **.env** está excluido del repositorio, para generar uno nuevo se toma como plantilla el archivo **.env.example** para copiar este archivo en uno nuevo escribe en tu terminal:
+```bash
+cp .env.example .env
+```
 
-## Contributing
+## 4. Generar Key
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Para que el proyecto en Laravel corra sin problemas es necesario generar una key de seguirdad, para ello en tu terminal corre el siguiente comando:
+```bash
+php artisan key:generate
+```
+Esta key nueva se agregará a tu archivo **.env**
 
-## Code of Conduct
+## 5. Crear base de datos
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Sí tu proyecto en Laravel funciona haciendo consultas a una base de datos entonces tienes que crear una nueva base de datos, la forma más rápida para crearla es desde tu administrador de base de datos (phpmyadmin si usas Xampp). Crea una nueva base de datos vacía con el nombre del proyecto **crudsc_sanctum**
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 6. Correr migraciones y seeds
 
-## License
+Sí tu proyecto cuenta con seeders y factories para poblar ciertas tablas en tu base de datos como usuarios para tu sistema escribe en la terminal:
+```bash
+php artisan migrate --seed
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 7. Correr el Servidor
+
+Por último, ponemos acorrer el proyecto escribiendo en la terminal el siguiente comando:
+```bash
+php artisan serve
+```
