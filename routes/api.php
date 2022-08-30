@@ -22,6 +22,9 @@ Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::get('user-profile', [UserController::class, 'userProfile']);
     Route::put('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
     Route::get('logout', [UserController::class, 'logout']);
+    Route::post('import-users', [UserController::class,'excel_UsersImports'])->name('excel-import-users');
+    Route::get('export-users-excel', [UserController::class,'excel_UsersExports'])->name('excel-export-users');
+    Route::get('export-users-pdf', [UserController::class,'pdf_UsersExports']);
 });
 
 //Esta ruta viene por defecto
