@@ -123,3 +123,21 @@ http://127.0.0.1:8000/api/user-profile
 http://127.0.0.1:8000/api/edit-user-profile/1
 http://127.0.0.1:8000/api/logout
 ```
+
+## 9. Limpiar caché de rutas y configuraciones previas
+Si tras clonar el repositorio (luego de alguna actualización) te da errores relacionados con caché, ejecutar en la terminal los siguientes comandos (uno despues del otro):
+
+```PHP
+php artisan config:clear
+```
+Para limpiar la config cache
+
+```PHP
+php artisan route:clear
+```
+Para limpiar la route cache
+
+```PHP
+php artisan cache:clear
+```
+Para limpiar la normal cache
