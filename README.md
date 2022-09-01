@@ -13,8 +13,6 @@
 - Es necesario tener en el sistema operativo [composer de manera global](https://www.youtube.com/watch?v=lPabQsgHvu0).
 - Tener instalado y configurado **[GIT](https://www.youtube.com/watch?v=wHh3IgJvXcE)**.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
 ## 1. Clonar el repositorio del proyecto en Laravel
 
 Para clonar el proyecto abre una terminal o consola de comandos y escribe la siguiente nomenclatura:
@@ -47,21 +45,81 @@ php artisan key:generate
 ```
 Esta key nueva se agregará a tu archivo **.env**
 
-## 5. Crear base de datos
+## 5. Crear base de datos y configurar el archivo .env
 
-Sí tu proyecto en Laravel funciona haciendo consultas a una base de datos entonces tienes que crear una nueva base de datos, la forma más rápida para crearla es desde tu administrador de base de datos (phpmyadmin si usas Xampp). Crea una nueva base de datos vacía con el nombre del proyecto **crudsc_sanctum**
-
+Nuestro proyecto de Laravel funciona haciendo consultas a una base de datos entonces tienes que crear una nueva base de datos, pero primero hay que configurar el archivo **.env** ubicado en la raíz del proyecto, esto con el fin de que la api se conecte con nuestra base de datos. La configuración debe estar como sigue:
+```PHP
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=crudsc_sanctum
+DB_USERNAME=root
+DB_PASSWORD=
+```
+Posteriormente, desde tu administrador de base de datos (phpmyadmin si usas Xampp). Crea una nueva base de datos vacía con el nombre del proyecto dado anteriormente en el archivo **.env**:
+```bash
+DB_DATABASE=crudsc_sanctum
+```
 
 ## 6. Correr migraciones y seeds
 
-Sí tu proyecto cuenta con seeders y factories para poblar ciertas tablas en tu base de datos como usuarios para tu sistema escribe en la terminal:
+Nuestro proyecto cuenta con seeders para poblar ciertas tablas en la base de datos como usuarios, roles y permisos por lo cual debemos escribir en la terminal:
 ```bash
 php artisan migrate --seed
 ```
 
+verificar en tu gestor de base de datos que la tabla **users** contenga los datos del usuario admin que se muestra a continuación:
+```PHP
+public function run()
+    {
+        $user = User::create([
+            'firstname' => 'Admin',
+            'lastname'  =>  'Admin',
+            'identification_document' => '12345678',
+            'email' => 'admin@gmail.com',
+            'gender' => 'M',
+            'birthday' => '1992-10-29',
+            'phone' => '04244600000',
+            'faculty' => 'Facyt',
+            'departament' => 'Computación',
+            'username' => 'admin',
+            'password'  =>  Hash::make('12345678'),
+        ]);
+        $user->assignRole('coordinator');
+    }
+```
+
 ## 7. Correr el Servidor
 
-Por último, ponemos acorrer el proyecto escribiendo en la terminal el siguiente comando:
+Ponemos acorrer el proyecto escribiendo en la terminal el siguiente comando:
 ```bash
 php artisan serve
+```
+Al ejecutar el comando anterior, y si todo sale bien, la terminal arrojará la siguiente respuesta:
+```bash
+Starting Laravel development server: http://127.0.0.1:8000
+[Tue Aug 30 14:13:51 2022] PHP 7.4.27 Development Server (http://127.0.0.1:8000) started
+```
+Con lo cual, todo estará bien y proseguimos con los endpoints.
+
+## 8. Endpoints
+
+A continuacion muestro los endpoints configurados hasta el momento los cuales se encuentran en la ruta **routes/api.php**:
+```PHP
+Route::post('register', [UserController::class, 'register']);
+Route::post('login', [UserController::class, 'login']);
+
+Route::group( ['middleware' => ['auth:sanctum']], function() {
+    Route::get('user-profile', [UserController::class, 'userProfile']);
+    Route::put('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
+    Route::get('logout', [UserController::class, 'logout']);
+});
+```
+Cada endpoint responde a las urls dadas a continuacion como ejemplos:
+```PHP
+http://127.0.0.1:8000/api/register
+http://127.0.0.1:8000/api/login
+http://127.0.0.1:8000/api/user-profile
+http://127.0.0.1:8000/api/edit-user-profile/1
+http://127.0.0.1:8000/api/logout
 ```
