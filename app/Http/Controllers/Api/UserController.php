@@ -5,14 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use Laravel\Sanctum\HasApiTokens;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\UserExport;
-use App\Imports\UserImport;
-use Illuminate\Support\Facades\App;
 
 class UserController extends Controller
 {
@@ -72,9 +68,9 @@ class UserController extends Controller
         return response()->json([
             "ok" => 'true',
             "message" => "Registro de Usuario Exitoso.",
-            "name" => $user->firstname." ".$user->lastname,
+            "username" => $user->username,
+            "password" => $request->identification_document,
             "uuid" => $user->id,
-            "identification_document" => $user->identification_document,
             "role" => $role,
         ]);
     }
@@ -169,19 +165,5 @@ class UserController extends Controller
             "ok" => 'true',
             "message" => "Cierre de Sesión Exitoso.",
         ]);
-    }
-
-    public function excel_UsersImports(Request $request) {
-        Excel::import(new UserImport, $request->file('file')->store('files'));
-        return redirect()->back();
-    }
-
-    public function excel_UsersExports(Request $request) {
-        return Excel::download(new UserExport, 'users.xlsx');
-    }
-
-    public function pdf_UsersExports () {
-        $dompdf = App::make("dompdf.wrapper");
-        return $dompdf->download("Users.pdf");
     }
 }

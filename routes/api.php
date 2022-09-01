@@ -1,8 +1,12 @@
 <?php
 
-use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\FilesController;
+use App\Http\Controllers\Api\CodeCheckController;
+use App\Http\Controllers\Api\ResetPasswordController;
+use App\Http\Controllers\Api\ForgotPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,13 +22,22 @@ use Illuminate\Support\Facades\Route;
 Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 
+
+// Route::post('password/email',  ForgotPasswordController::class);
+// Route::post('password/code/check', CodeCheckController::class);
+// Route::post('password/reset', ResetPasswordController::class);
+
+
 Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::get('user-profile', [UserController::class, 'userProfile']);
     Route::put('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
     Route::get('logout', [UserController::class, 'logout']);
-    Route::post('import-users', [UserController::class,'excel_UsersImports'])->name('excel-import-users');
-    Route::get('export-users-excel', [UserController::class,'excel_UsersExports'])->name('excel-export-users');
-    Route::get('export-users-pdf', [UserController::class,'pdf_UsersExports']);
+});
+
+Route::prefix('/files')->group(function () {
+    Route::post('/import-users', [FilesController::class,'excel_UsersImports'])->name('excel-import-users');
+    Route::get('/export-users-excel', [FilesController::class,'excel_UsersExports'])->name('excel-export-users');
+    Route::get('/export-users-pdf', [FilesController::class,'pdf_UsersExports']);
 });
 
 //Esta ruta viene por defecto

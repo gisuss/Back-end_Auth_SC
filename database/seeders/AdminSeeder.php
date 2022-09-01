@@ -25,6 +25,7 @@ class AdminSeeder extends Seeder
             'phone' => '04244600000',
             'faculty' => 'Facyt',
             'departament' => 'Computación',
+            'active' => '1',
             'username' => 'admin',
             'password'  =>  Hash::make('12345678'),
         ]);

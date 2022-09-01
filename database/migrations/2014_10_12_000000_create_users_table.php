@@ -28,7 +28,7 @@ class CreateUsersTable extends Migration
             $table->string('phone')->nullable();
             $table->string('gender')->nullable();
             $table->date('birthday')->nullable();
-            $table->unsignedSmallInteger('active')->nullable();
+            $table->unsignedSmallInteger('active')->default(1);
 
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
