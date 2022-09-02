@@ -22,16 +22,14 @@ use App\Http\Controllers\Api\ForgotPasswordController;
 Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 
-
 // Route::post('password/email',  ForgotPasswordController::class);
 // Route::post('password/code/check', CodeCheckController::class);
 // Route::post('password/reset', ResetPasswordController::class);
 
-
 Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::get('user-profile', [UserController::class, 'userProfile']);
-    Route::put('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
-    Route::get('logout', [UserController::class, 'logout']);
+    Route::post('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
+    Route::post('logout', [UserController::class, 'logout']);
 });
 
 Route::prefix('/files')->group(function () {

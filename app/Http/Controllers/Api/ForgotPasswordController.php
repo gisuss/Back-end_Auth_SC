@@ -28,7 +28,7 @@ class ForgotPasswordController extends Controller
         // return $this->jsonResponse(null, trans('passwords.sent'), 200);
         return response()->json([
             "message" => trans('passwords.sent'),
-            "ok" => true,
+            "ok" => 'true',
         ]);
     }
 }

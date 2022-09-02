@@ -20,9 +20,18 @@ class UserController extends Controller
             'identification_document' => 'required|string|min:6'
         ]);
 
+        $firstname = ucwords(Str::lower(trim(preg_replace('/[0-9\@\.\;\*\#\$\%\_\-\!\,]+/', '', $request->firstname), ' ')));
+        $lastname = ucwords(Str::lower(trim(preg_replace('/[0-9\@\.\;\*\#\$\%\_\-\!\,]+/', '', $request->lastname), ' ')));
+        if (($firstname == "") || ($lastname == "")) {
+            return response()->json([
+                "ok" => false,
+                "message" => "Registro de Usuario No Exitoso, Verifique los campos de Nombre y Apellido.",
+            ]);
+        }
+
         $user = new User();
-        $user->firstname = trim(Str::ucfirst(Str::lower($request->firstname)));
-        $user->lastname = trim(Str::ucfirst(Str::lower($request->lastname)));
+        $user->firstname = $firstname;
+        $user->lastname = $lastname;
         $user->email = trim(Str::lower($request->email));
         $user->identification_document = $request->identification_document;
 
@@ -39,14 +48,15 @@ class UserController extends Controller
 
         //GENERANDO USERNAME
         $i = 1;
-        $username = substr(Str::lower($user->firstname), 0, $i).Str::lower($user->lastname);
+        $apellido = explode(" ", $user->lastname);
+        $username = substr(Str::lower($user->firstname), 0, $i).Str::lower($apellido[0]);
         while (DB::table('users')->where('username', $username)->exists()) {
             $i += 1;
             if ($i <= 2) {
-                $username = substr(Str::lower($user->firstname), 0, $i).Str::lower($user->lastname);
+                $username = substr(Str::lower($user->firstname), 0, $i).Str::lower($apellido[0]);
             }else{
-                $j = $i-2;
-                $username = substr(Str::lower($user->firstname), 0, 2).Str::lower($user->lastname).$j;
+                $j = $i-1;
+                $username = substr(Str::lower($user->firstname), 0, 2).Str::lower($apellido[0]).$j;
             }
         }
         $user->username = $username;
@@ -54,24 +64,13 @@ class UserController extends Controller
         //GENERANDO PASSWORD Hash::make($request->identification_document)
         $user->password = Hash::make($request->identification_document);
 
-        //ROL ASIGNADO AL USUARIO
-        if ($user->hasRole('coordinator')) {
-            $role = 'coordinator';
-        }else if ($user->hasRole('student')) {
-            $role = 'student';
-        }else if ($user->hasRole('tutor')) {
-            $role = 'tutor';
-        }
-
         $user->save();
 
         return response()->json([
-            "ok" => 'true',
+            "ok" => true,
             "message" => "Registro de Usuario Exitoso.",
             "username" => $user->username,
             "password" => $request->identification_document,
-            "uuid" => $user->id,
-            "role" => $role,
         ]);
     }
 
@@ -89,34 +88,37 @@ class UserController extends Controller
                 $role = $user->getRoleNames();
                 
                 return response()->json([
-                    "ok" => 'true',
+                    "ok" => true,
                     "message" => "Usuario Logeado Exitosamente.",
                     "name" => $user->firstname." ".$user->lastname,
                     "uuid" => $user->id,
                     "identification_document" => $user->identification_document,
                     "role" => $role[0],
-                    'token_type' => 'bearer',
                     "token" => $token,
                 ]);
             }else{
                 return response()->json([
-                    "ok" => 'false',
+                    "ok" => false,
                     "message" => "La contraseña es incorrecta.",
                 ]);
             }
         }else{
             return response()->json([
-                "ok" => 'false',
+                "ok" => false,
                 "message" => "Usuario no Registrado.",
             ]);
         }
     }
 
     public function userProfile() {
+        $id = auth()->id();
+        $user = User::find($id);
+        $role = $user->getRoleNames();
         return response()->json([
-            "ok" => 'true',
+            "ok" => true,
             "message" => "Datos del Perfil de Usuario.",
-            "data" => auth()->user(),
+            "role" => $role[0],
+            "user" => auth()->user(),
         ]);
     }
 
@@ -135,34 +137,36 @@ class UserController extends Controller
             $user->active = isset($request->active) ? $request->active : $user->active;
 
             $user->update();
+            $role = $user->getRoleNames();
 
             if (isset($request->role)) {
-                if ($request->role != $user->role) {
-                    // DB::table('model_has_roles')->where('model_id',$id)->delete();
-                    $user->removeRole($user->role);
+                if ($request->role != $role[0]) {
+                    $user->removeRole($role[0]);
                     $user->assignRole($request->role);
+                    unset($role);
+                    $role = $user->getRoleNames();
                 }
             }
 
             return response()->json([
-                "ok" => 'true',
+                "ok" => true,
                 'message' => "Usuario Actualizado Correctamente.",
                 "data" => $user,
+                "role" => $role[0],
             ]);
         }else{
             return response()->json([
-                "ok" => "false",
-                "message" => "El usuario no se encuentra Registrado"
+                "ok" => false,
+                "message" => "El usuario no se encuentra Registrado",
             ]);
         }
     }
 
     public function logout(Request $request) {
-        $request->user()->currentAccessToken()->delete();
-        // auth()->user()->tokens()->delete();
+        auth()->user()->tokens()->delete();
 
         return response()->json([
-            "ok" => 'true',
+            "ok" => true,
             "message" => "Cierre de Sesión Exitoso.",
         ]);
     }

@@ -30,6 +30,6 @@ class SendCodeResetPassword extends Mailable
      */
     public function build()
     {
-        return $this->markdown('email.send-code-reset-password');
+        return $this->view('emails.send-code-reset-password');
     }
 }
