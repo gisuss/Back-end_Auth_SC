@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -163,7 +164,8 @@ class UserController extends Controller
     }
 
     public function logout(Request $request) {
-        auth()->user()->tokens()->delete();
+        // auth()->user()->HasApiTokens::tokens()->delete();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             "ok" => true,
