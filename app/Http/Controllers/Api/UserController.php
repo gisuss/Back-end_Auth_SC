@@ -165,7 +165,10 @@ class UserController extends Controller
 
     public function logout(Request $request) {
         // auth()->user()->HasApiTokens::tokens()->delete();
-        $request->user()->currentAccessToken()->delete();
+        // $request->user()->currentAccessToken()->delete();
+        $id = auth()->id();
+        $user = User::find($id);
+        $user->tokens()->delete();
 
         return response()->json([
             "ok" => true,
