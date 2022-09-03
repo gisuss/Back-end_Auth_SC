@@ -29,6 +29,7 @@ Route::post('login', [UserController::class, 'login']);
 Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::get('user-profile', [UserController::class, 'userProfile']);
     Route::post('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
+    Route::post('change-password', [UserController::class, 'changePassword']);
     Route::post('logout', [UserController::class, 'logout']);
 });
 
