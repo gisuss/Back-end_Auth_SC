@@ -67,26 +67,15 @@ Nuestro proyecto cuenta con seeders para poblar ciertas tablas en la base de dat
 ```bash
 php artisan migrate --seed
 ```
+O si ya tienes la base de datos y deseas correr una actualizacion de las migraciones, entonces usa el siguiente comando:
+```bash
+php artisan migrate:fresh --seed
+```
 
-verificar en tu gestor de base de datos que la tabla **users** contenga los datos del usuario admin que se muestra a continuación:
+Al ejecutar el comando anterior, verificar en tu gestor de base de datos que en la tabla **users** contenga los datos del usuario admin. A continuación te indico los datos para el inicio de sesión usando el usuario Admin:
 ```PHP
-public function run()
-    {
-        $user = User::create([
-            'firstname' => 'Admin',
-            'lastname'  =>  'Admin',
-            'identification_document' => '12345678',
-            'email' => 'admin@gmail.com',
-            'gender' => 'M',
-            'birthday' => '1992-10-29',
-            'phone' => '04244600000',
-            'faculty' => 'Facyt',
-            'departament' => 'Computación',
-            'username' => 'admin',
-            'password'  =>  Hash::make('12345678'),
-        ]);
-        $user->assignRole('coordinator');
-    }
+username: admin
+password: 12345678
 ```
 
 ## 7. Correr el Servidor
