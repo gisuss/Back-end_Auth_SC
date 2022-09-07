@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\FilesController;
+use App\Http\Controllers\Api\SCAuthController;
 use App\Http\Controllers\Api\CodeCheckController;
 use App\Http\Controllers\Api\ResetPasswordController;
 use App\Http\Controllers\Api\ForgotPasswordController;
@@ -20,7 +20,8 @@ use App\Http\Controllers\Api\ForgotPasswordController;
 */
 
 Route::post('register', [UserController::class, 'register']);
-Route::post('login', [UserController::class, 'login']);
+Route::post('login', [SCAuthController::class, 'login']);
+Route::get('userExists', [UserController::class, 'userExists']); //EN PROCESO
 
 // Route::post('password/email',  ForgotPasswordController::class);
 // Route::post('password/code/check', CodeCheckController::class);
@@ -29,17 +30,8 @@ Route::post('login', [UserController::class, 'login']);
 Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::get('user-profile', [UserController::class, 'userProfile']);
     Route::post('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
+    Route::post('delete-user/{id}', [UserController::class, 'deleteUser']);
     Route::post('change-password', [UserController::class, 'changePassword']);
-    Route::post('logout', [UserController::class, 'logout']);
-});
-
-Route::prefix('/files')->group(function () {
-    Route::post('/import-users', [FilesController::class,'excel_UsersImports'])->name('excel-import-users');
-    Route::get('/export-users-excel', [FilesController::class,'excel_UsersExports'])->name('excel-export-users');
-    Route::get('/export-users-pdf', [FilesController::class,'pdf_UsersExports']);
-});
-
-//Esta ruta viene por defecto
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    Route::post('logout', [SCAuthController::class, 'logout']);
+    Route::get('refresh-token', [SCAuthController::class, 'refresh']);
 });

@@ -6,10 +6,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -20,11 +18,8 @@ class UserController extends Controller
             'lastname' => 'required|string|min:4',
             'email' => 'required|email|unique:users',
             'identification_document' => 'required|string|min:6',
-            'faculty' => 'nullable|string',
-            'departament' => 'nullable|string',
-            'phone' => 'nullable|string',
-            'gender' => 'nullable|string',
-            'birthday' => 'nullable'
+            'role' => 'required',
+            'active' => 'nullable'
         ]);
 
         if ($validator->fails()) {
@@ -63,17 +58,8 @@ class UserController extends Controller
                     $user->lastname = $lastname;
                     $user->email = trim(Str::lower($request->email));
                     $user->identification_document = $cedula;
-
-                    $user->departament = isset($request->departament) ? $request->departament : NULL;
-                    $user->faculty = isset($request->faculty) ? $request->faculty : NULL;
-                    $user->phone = isset($request->phone) ? $request->phone : NULL;
-                    $user->gender = isset($request->gender) ? $request->gender : NULL;
-                    $user->birthday = isset($request->birthday) ? $request->birthday : NULL;
                     $user->active = isset($request->active) ? $request->active : 1;
-
-                    if ($request->role != NULL) {
-                        $user->assignRole($request->role);
-                    }
+                    $user->assignRole($request->role);
 
                     //GENERANDO USERNAME
                     $i = 1;
@@ -106,41 +92,6 @@ class UserController extends Controller
         }
     }
 
-    public function login(Request $request) {
-        if (!Auth::attempt($request->only('username', 'password'))) {
-            return response()->json([
-                "ok" => false,
-                "message" => "Las Credenciales Suministradas no son Válidas.",
-            ], 422);
-        }else{
-            $user = User::where('username', $request['username'])->firstOrFail();
-            $token = $user->createToken($request->username."_auth_token")->plainTextToken;
-            $role = $user->getRoleNames();
-
-            if (sizeof($role) == 0) {
-                return response()->json([
-                    "ok" => true,
-                    "message" => "Usuario Logeado Exitosamente.",
-                    "name" => $user->firstname." ".$user->lastname,
-                    "uuid" => $user->id,
-                    "identification_document" => $user->identification_document,
-                    "role" => NULL,
-                    "token" => $token,
-                ], 200);
-            }else{
-                return response()->json([
-                    "ok" => true,
-                    "message" => "Usuario Logeado Exitosamente.",
-                    "name" => $user->firstname." ".$user->lastname,
-                    "uuid" => $user->id,
-                    "identification_document" => $user->identification_document,
-                    "role" => $role[0],
-                    "token" => $token,
-                ], 200);
-            }
-        }
-    }
-
     public function userProfile(Request $request) {
         $role = $request->user()->getRoleNames();
         if (sizeof($role) == 0) {
@@ -166,12 +117,8 @@ class UserController extends Controller
             'lastname' => 'required|string|min:4',
             'email' => 'required|email|unique:users',
             'identification_document' => 'required|string|min:6',
-            'faculty' => 'nullable|string',
-            'departament' => 'nullable|string',
-            'phone' => 'nullable|string',
-            'gender' => 'nullable|string',
-            'birthday' => 'nullable',
-            'role' => 'nullable'
+            'role' => 'required',
+            'active' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -193,16 +140,26 @@ class UserController extends Controller
                 }else{
                     $user->firstname = $firstname;
                     $user->lastname = $lastname;
-                    $user->email = isset($request->email) ? trim(Str::lower($request->email)) : $user->email;
-                    $user->faculty = isset($request->faculty) ? $request->faculty : $user->faculty;
-                    $user->departament = isset($request->departament) ? $request->departament : $user->departament;
-                    $user->phone = isset($request->phone) ? $request->phone : $user->phone;
-                    $user->gender = isset($request->gender) ? $request->gender : $user->gender;
-                    $user->birthday = isset($request->birthday) ? $request->birthday : $user->birthday;
-                    $user->active = isset($request->active) ? $request->active : $user->active;
-        
+                    trim(Str::lower($request->email));
+
+                    // VALIDANDO EMAIL
+                    if ($request->email != $user->email) {
+                        if (DB::table('users')->where('email', $request->email)->exists()) {
+                            return response()->json([
+                                "ok" => false,
+                                "message" => "Registro de Usuario No Exitoso, el email suministrado ya existe.",
+                            ], 422);
+                        }
+                    }
+                    $user->email = $request->email;
+
+                    // VALIDANDO STATUS DE ACTIVIDAD
+                    if ($request->active != $user->active) {
+                        $user->active = $request->active;
+                    }
+
                     //GENERANDO CEDULA VALIDA
-                    if (isset($request->identification_document)) {
+                    if ($user->identification_document != $request->identification_document) {
                         $letra = Str::upper(substr(trim($request->identification_document), 0, 1));
                         if ($letra == 'V' || $letra == 'E') {
                             $ci_sin_formato = preg_replace('/[^0-9]/i', '', $request->identification_document);
@@ -211,64 +168,48 @@ class UserController extends Controller
                             $ci_sin_formato = preg_replace('/[^0-9]/i', '', $request->identification_document);
                             $cedula = "V-".$ci_sin_formato;
                         }
-        
-                        if (DB::table('users')->where('identification_document', $cedula)->exists()) {
-                            return response()->json([
-                                "ok" => false,
-                                "message" => "Registro de Usuario No Exitoso, la Cédula de Identidad suministrada ya existe.",
-                            ], 422);
-                        }else{
-                            $user->identification_document = $cedula;
-                        }
+                    }else{
+                        $cedula = $request->identification_document;
+                    }
+
+                    if (DB::table('users')->where('identification_document', $cedula)->exists()) {
+                        return response()->json([
+                            "ok" => false,
+                            "message" => "Registro de Usuario No Exitoso, la Cédula de Identidad suministrada ya existe.",
+                        ], 422);
+                    }else{
+                        $user->identification_document = $cedula;
                     }
         
                     $user->update();
 
                     $role = $user->getRoleNames();
 
-                    if (isset($request->role)) {
-                        if (sizeof($role) == 0) {
+                    if (sizeof($role) == 0) {
+                        $user->assignRole($request->role);
+                        unset($role);
+                        $role = $user->getRoleNames();
+
+                        return response()->json([
+                            "ok" => true,
+                            'message' => "Usuario Actualizado Correctamente.",
+                            "role" => $role[0],
+                            "data" => $user,
+                        ], 200);
+                    }else{
+                        if ($request->role != $role[0]) {
+                            $user->removeRole($role[0]);
                             $user->assignRole($request->role);
                             unset($role);
                             $role = $user->getRoleNames();
-
-                            return response()->json([
-                                "ok" => true,
-                                'message' => "Usuario Actualizado Correctamente.",
-                                "role" => $role[0],
-                                "data" => $user,
-                            ], 200);
-                        }else{
-                            if ($request->role != $role[0]) {
-                                $user->removeRole($role[0]);
-                                $user->assignRole($request->role);
-                                unset($role);
-                                $role = $user->getRoleNames();
-                            }
-
-                            return response()->json([
-                                "ok" => true,
-                                'message' => "Usuario Actualizado Correctamente.",
-                                "role" => $role[0],
-                                "data" => $user,
-                            ], 200);
                         }
-                    }else{
-                        if (sizeof($role) == 0) {
-                            return response()->json([
-                                "ok" => true,
-                                'message' => "Usuario Actualizado Correctamente.",
-                                "role" => NULL,
-                                "data" => $user,
-                            ], 200);
-                        }else{
-                            return response()->json([
-                                "ok" => true,
-                                'message' => "Usuario Actualizado Correctamente.",
-                                "role" => $role[0],
-                                "data" => $user,
-                            ], 200);
-                        }
+
+                        return response()->json([
+                            "ok" => true,
+                            'message' => "Usuario Actualizado Correctamente.",
+                            "role" => $role[0],
+                            "data" => $user,
+                        ], 200);
                     }
                 }
             }else{
@@ -279,7 +220,7 @@ class UserController extends Controller
             }
         }
     }
-    
+
     public function changePassword (Request $request) {
         $validator = Validator::make($request->all(), [
             'old_password' => 'required',
@@ -295,11 +236,11 @@ class UserController extends Controller
             ], 422);
         }
 
-        $user = $request->user();
+        $id = $request->user()->id;
+        $user = User::find($id);
         if (Hash::check($request->old_password, $user->password)) {
-            $user->update([
-                'password' => Hash::make($request->password)
-            ]);
+            $user->password = Hash::make($request->password);
+            $user->update();
 
             return response()->json([
                 'ok' => true,
@@ -313,21 +254,59 @@ class UserController extends Controller
         }
     }
 
-    public function logout() {
-        $id = auth()->id();
-        if (isset($id)) {
-            $user = User::find($id);
-            $user->tokens()->delete();
+    public function userExists(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'identification_document' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Verifique la Cédula Suministrada.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }else{
+            //GENERANDO CEDULA VALIDA
+            $letra = Str::upper(substr(trim($request->identification_document), 0, 1));
+            if ($letra == 'V' || $letra == 'E') {
+                $ci_sin_formato = preg_replace('/[^0-9]/i', '', $request->identification_document);
+                $cedula = $letra."-".$ci_sin_formato;
+            }else{
+                $ci_sin_formato = preg_replace('/[^0-9]/i', '', $request->identification_document);
+                $cedula = "V-".$ci_sin_formato;
+            }
+
+            if (DB::table('users')->where('identification_document', $cedula)->exists()) {
+                return response()->json([
+                    "ok" => false,
+                    "message" => "La Cédula de Identidad: ".$cedula." ya existe.",
+                ], 422);
+            }else{
+                return response()->json([
+                    "ok" => true,
+                    "message" => "La Cédula de Identidad: ".$cedula." NO está Registrada.",
+                ], 200);
+            }
+        }
+    }
+
+    public function deleteUser($id) {
+        $user = User::find($id);
+        
+        if (isset($user->id)) {
+            $role = $user->getRoleNames();
+            $user->removeRole($role[0]);
+            $user->delete();
 
             return response()->json([
                 "ok" => true,
-                "message" => "Cierre de Sesión Exitoso.",
+                "message" => "Usuario Eliminado Exitosamente.",
             ], 200);
         }else{
             return response()->json([
                 "ok" => false,
-                "message" => "Cierre de Sesión Fallido.",
-            ], 401);
+                "message" => "Usuario No existe.",
+            ]);
         }
     }
 }
