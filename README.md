@@ -130,3 +130,17 @@ Para limpiar la route cache
 php artisan cache:clear
 ```
 Para limpiar la normal cache
+
+## 10. Configuración de correo de pruebas [Mailtrao.io](https://mailtrap.io/home)
+Ingresan al sitio [Mailtrao.io](https://mailtrap.io/home) y se crean una cuenta (pueden logearse usando su cuenta de github), luego seleccionan "Laravel 7+" en la pestaña "SMTP Settings" > "Integrations" y copian al portapapeles la configuración de su servidor de correos de pruebas:
+```PHP
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=xxxxxxxxxxx
+MAIL_PASSWORD=xxxxxxxxxxx
+MAIL_ENCRYPTION=tls
+```
+**OJO: Esto es solo un ejemplo**
+
+Se dirigen al archivo **.env** ubicado en la raíz del proyecto y en la sección de "MAIL" reemplazan la configuración por defecto con la configuración que copiaron al portapapeles en el paso anterior. Listo, su servidor de pruebas está listo para gestionar solicitudes de emails.
