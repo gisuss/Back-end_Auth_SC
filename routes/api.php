@@ -1,12 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\SCAuthController;
-use App\Http\Controllers\Api\CodeCheckController;
-use App\Http\Controllers\Api\ResetPasswordController;
-use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,9 +20,7 @@ Route::post('register', [UserController::class, 'register']);
 Route::post('login', [SCAuthController::class, 'login']);
 Route::get('userExists', [UserController::class, 'userExists']); //EN PROCESO
 
-// Route::post('password/email',  ForgotPasswordController::class);
-// Route::post('password/code/check', CodeCheckController::class);
-// Route::post('password/reset', ResetPasswordController::class);
+Route::post('password/email',  [ForgotPasswordController::class, 'sendResetLinkEmail']);
 
 Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::get('user-profile', [UserController::class, 'userProfile']);

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\HasApiTokens;
 
 class SCAuthController extends Controller
 {
@@ -13,10 +14,11 @@ class SCAuthController extends Controller
         if (!Auth::attempt($request->only('username', 'password'))) {
             return response()->json([
                 "ok" => false,
-                "message" => "Las Credenciales Suministradas NO son Válidas.",
+                "message" => "Las Credenciales Suministradas son Inválidas.",
             ], 422);
         }else{
             $user = User::where('username', $request['username'])->first();
+            $user->tokens()->delete();
             $token = $user->createToken($request->username."_auth_token")->plainTextToken;
             $role = $user->getRoleNames();
 
@@ -24,7 +26,6 @@ class SCAuthController extends Controller
                 return response()->json([
                     "ok" => true,
                     "message" => "Usuario Logeado Exitosamente.",
-                    "name" => $user->firstname." ".$user->lastname,
                     "uuid" => $user->id,
                     "identification_document" => $user->identification_document,
                     "role" => NULL,
@@ -34,13 +35,13 @@ class SCAuthController extends Controller
                 return response()->json([
                     "ok" => true,
                     "message" => "Usuario Logeado Exitosamente.",
-                    "name" => $user->firstname." ".$user->lastname,
                     "uuid" => $user->id,
                     "identification_document" => $user->identification_document,
                     "role" => $role[0],
                     "token" => $token,
                 ], 200);
             }
+            
         }
     }
 
@@ -73,7 +74,6 @@ class SCAuthController extends Controller
             return response()->json([
                 "ok" => true,
                 "message" => "Usuario Logeado Exitosamente.",
-                "name" => $user->firstname." ".$user->lastname,
                 "uuid" => $user->id,
                 "identification_document" => $user->identification_document,
                 "role" => NULL,
@@ -83,7 +83,6 @@ class SCAuthController extends Controller
             return response()->json([
                 "ok" => true,
                 "message" => "Usuario Logeado Exitosamente.",
-                "name" => $user->firstname." ".$user->lastname,
                 "uuid" => $user->id,
                 "identification_document" => $user->identification_document,
                 "role" => $role[0],
