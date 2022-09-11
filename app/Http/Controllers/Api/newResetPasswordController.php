@@ -17,7 +17,6 @@ class newResetPasswordController extends Controller
         $validator = Validator::make($request->all(), [
             'password' => ['required', 'string', 'min:8'],
             'confirm_password' => ['required', 'same:password'],
-            'tokenurl' => ['required'],
         ]);
 
         if ($validator->fails()) {
