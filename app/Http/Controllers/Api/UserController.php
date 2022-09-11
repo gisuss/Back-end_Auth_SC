@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Mail\RegisterMail;
+use App\Mail\SendMailtoUserRegister;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Auth\Events\Registered;
 
 class UserController extends Controller
 {
@@ -75,6 +79,10 @@ class UserController extends Controller
                     $user->password = Hash::make($ci_sin_formato);
                     $user->assignRole($request->role);
                     $user->save();
+
+                    event(new Registered($user));
+
+                    Mail::to($user->email)->send(new RegisterMail($username, $ci_sin_formato));
 
                     return response()->json([
                         "ok" => true,
