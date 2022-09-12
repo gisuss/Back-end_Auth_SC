@@ -41,7 +41,6 @@ class SCAuthController extends Controller
                     "token" => $token,
                 ], 200);
             }
-            
         }
     }
 

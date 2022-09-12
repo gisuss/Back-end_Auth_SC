@@ -1,5 +1,5 @@
 @component('mail::message')
-¡Hola!
+# ¡Hola!<br>
 Estás recibiendo este email porque se ha solicitado un cambio de contraseña para tu cuenta.
 
 @component('mail::button', ['url' => $ruta])

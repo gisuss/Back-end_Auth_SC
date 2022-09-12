@@ -12,7 +12,7 @@ class RegisterMail extends Mailable
     use Queueable, SerializesModels;
 
     public $username;
-    public $ci;
+    public $password;
     public $emailConfirmationUrl;
 
     /**
@@ -20,10 +20,11 @@ class RegisterMail extends Mailable
      *
      * @return void
      */
-    public function __construct($name, $cedula)
+    public function __construct($name, $cedula, $token)
     {
         $this->username = $name;
-        $this->ci = $cedula;
+        $this->password = $cedula;
+        $this->emailConfirmationUrl = "http://localhost:4200/auth/confirm-email/".$token;
     }
 
     /**
@@ -34,7 +35,9 @@ class RegisterMail extends Mailable
     public function build()
     {
         return $this->from('example@example.com')
-                    ->subject("Bienvenido.")
-                    ->markdown('mails.register', ['username' => $this->username, 'cedula' => $this->ci]);
+                    ->subject("Bienvenido")
+                    ->markdown('mails.register',    ['username' => $this->username,
+                                                    'pass' => $this->password,
+                                                    'link' => $this->emailConfirmationUrl]);
     }
 }

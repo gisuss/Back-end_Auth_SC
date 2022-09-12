@@ -8,16 +8,8 @@ Tus datos de inicio de sesión son los siguientes:
 @component('mail::table')
 | Username      | Password      |
 | ------------- |:-------------:|
-| {{$username}}     | {{$cedula}}       |
+| {{$username}}     | {{$pass}}       |
 @endcomponent
-
-Lo primero que debes hacer es confirmar tu correo electrónico haciendo click en el siguiente enlace:
-
-@component('mail::button', ['url' => $emailConfirmationUrl])
-Verificar Email
-@endcomponent
-
-De esta forma podremos estar en contacto.
 
 Y si llegas a olvidar tu contraseña, la podrás recuperar a través de este correo.
 

@@ -8,11 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Mail\RegisterMail;
-use App\Mail\SendMailtoUserRegister;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Auth\Events\Registered;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -80,9 +79,16 @@ class UserController extends Controller
                     $user->assignRole($request->role);
                     $user->save();
 
-                    event(new Registered($user));
+                    $token = Str::random(64);
+                    $confirm_email = DB::table('verifyuseremails')->insert([
+                        'email' => $request->all()['email'],
+                        'token' =>  $token,
+                        'created_at' => Carbon::now()
+                    ]);
 
-                    Mail::to($user->email)->send(new RegisterMail($username, $ci_sin_formato));
+                    if ($confirm_email) {
+                        Mail::to($user->email)->send(new RegisterMail($username, $ci_sin_formato, $token));
+                    }
 
                     return response()->json([
                         "ok" => true,
@@ -93,6 +99,38 @@ class UserController extends Controller
                 }
             }
         }
+    }
+
+    public function verifyuseremail(Request $request) {
+        $token = $request->header('Authorization');
+        $check = DB::table('verifyuseremails')->where('token', $token);
+
+        if ($check->exists()) {
+            $difference = Carbon::now()->diffInSeconds($check->first()->created_at);
+            if ($difference > 604800) {
+                $mensaje = "Token Expirado. Recuerde que dispone de 7 días para culminar su proceso de verificación de email.";
+                $bool = false;
+            }else{
+                $mensaje = "Token Válido.";
+                $bool = true;
+
+                $result = $check->first();
+                $email = $result->email;
+                $user = User::where('email', $email);
+                $user->update([
+                    'email_verified_at' => Carbon::now()
+                ]);
+            }
+        }else{
+            $mensaje = "Token Inválido.";
+            $bool = false;
+        }
+        
+        $check->delete();
+        return response()->json([
+            'ok' => $bool,
+            'message' => $mensaje,
+        ]);
     }
 
     public function userProfile(Request $request) {
