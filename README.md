@@ -96,12 +96,18 @@ Con lo cual, todo estará bien y proseguimos con los endpoints.
 A continuacion muestro los endpoints configurados hasta el momento los cuales se encuentran en la ruta **routes/api.php**:
 ```PHP
 Route::post('register', [UserController::class, 'register']);
-Route::post('login', [UserController::class, 'login']);
+Route::post('login', [SCAuthController::class, 'login']);
+Route::put('verify-email', [UserController::class, 'verifyuseremail']);
+Route::post('forgot-password', [newForgotPasswordController::class, 'forgotPassword']);
+Route::put('reset-password', [newResetPasswordController::class, 'resetPassword']);
 
 Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::get('user-profile', [UserController::class, 'userProfile']);
     Route::put('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
-    Route::get('logout', [UserController::class, 'logout']);
+    Route::delete('delete-user/{id}', [UserController::class, 'deleteUser']);
+    Route::put('change-password', [UserController::class, 'changePassword']);
+    Route::post('logout', [SCAuthController::class, 'logout']);
+    Route::get('refresh-token', [SCAuthController::class, 'refresh']);
 });
 ```
 Cada endpoint responde a las urls dadas a continuacion como ejemplos:
@@ -113,7 +119,23 @@ http://127.0.0.1:8000/api/edit-user-profile/1
 http://127.0.0.1:8000/api/logout
 ```
 
-## 9. Limpiar caché de rutas y configuraciones previas
+## 9. Configuración de correo de pruebas [Mailtrap.io](https://mailtrap.io/home)
+
+Ingresan al sitio [Mailtrap.io](https://mailtrap.io/home) y se crean una cuenta (pueden logearse usando su cuenta de github), luego seleccionan "Laravel 7+" en la pestaña "SMTP Settings" > "Integrations" y copian al portapapeles la configuración de su servidor de correos de pruebas:
+```PHP
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=xxxxxxxxxxx
+MAIL_PASSWORD=xxxxxxxxxxx
+MAIL_ENCRYPTION=tls
+```
+**OJO: Esto es solo un ejemplo**
+
+Se dirigen al archivo **.env** ubicado en la raíz del proyecto y en la sección de "MAIL" reemplazan la configuración por defecto con la configuración que copiaron al portapapeles en el paso anterior. Listo, su servidor de pruebas está listo para gestionar solicitudes de emails.
+
+## 10. Limpiar caché de rutas y configuraciones previas
+
 Si tras clonar el repositorio (luego de alguna actualización) te da errores relacionados con caché, ejecutar en la terminal los siguientes comandos (uno despues del otro):
 
 ```PHP
