@@ -96,6 +96,7 @@ Con lo cual, todo estará bien y proseguimos con los endpoints.
 A continuacion muestro los endpoints configurados hasta el momento los cuales se encuentran en la ruta **routes/api.php**:
 ```PHP
 Route::post('register', [UserController::class, 'register']);
+Route::post('register-masivo', [UserController::class, 'registerMasivo']);
 Route::post('login', [SCAuthController::class, 'login']);
 Route::put('verify-email', [UserController::class, 'verifyuseremail']);
 Route::post('forgot-password', [newForgotPasswordController::class, 'forgotPassword']);

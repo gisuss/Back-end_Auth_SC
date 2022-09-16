@@ -117,15 +117,15 @@ class UserController extends Controller
         $usersOutput = [];
         $userErrors = [];
         $userRoles = [];
-        $j = 0;
+        $pos = 1;
 
         foreach ($usersInput as $datum) {
-            $j += 1;
+            $pos += 1;
             $first_name = ucwords(Str::lower(trim(preg_replace('/[^a-z" "]/i', '', $datum['first_name']), ' ')));
             $last_name = ucwords(Str::lower(trim(preg_replace('/[^a-z" "]/i', '', $datum['last_name']), ' ')));
             if (($first_name == "") || ($last_name == "") || (DB::table('users')->where('email', trim(Str::lower($datum['email'])))->exists())) {
                 //ALMACENAR INDICE DE USUARIO NO AGREGADO
-                $userErrors[] = $j;
+                $userErrors[] = $pos;
             }else{
                 //GENERANDO CEDULA VALIDA
                 $letra = Str::upper(substr(trim($datum['identification']), 0, 1));
@@ -139,7 +139,7 @@ class UserController extends Controller
 
                 if (($ci_sin_formato == "") || (DB::table('users')->where('identification', $cedula)->exists())) {
                     //ALMACENAR INDICE DE USUARIO NO AGREGADO
-                    $userErrors[] = $j;
+                    $userErrors[] = $pos;
                 }else{
                     //GENERANDO USERNAME
                     $i = 1;
