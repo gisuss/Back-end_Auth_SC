@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\newForgotPasswordController;
 */
 
 Route::post('register', [UserController::class, 'register']);
+Route::post('register-masivo', [UserController::class, 'registerMasivo']);
 Route::post('login', [SCAuthController::class, 'login']);
 Route::put('verify-email', [UserController::class, 'verifyuseremail']);
 Route::post('forgot-password', [newForgotPasswordController::class, 'forgotPassword']);
@@ -29,6 +30,5 @@ Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::delete('delete-user/{id}', [UserController::class, 'deleteUser']);
     Route::put('change-password', [UserController::class, 'changePassword']);
     Route::post('logout', [SCAuthController::class, 'logout']);
-    Route::get('refresh-token', [SCAuthController::class, 'refresh']);
-    Route::get('userExists', [UserController::class, 'userExists']); //EN PROCESO
+    Route::post('refresh-token', [SCAuthController::class, 'refresh']);
 });
