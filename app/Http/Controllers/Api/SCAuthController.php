@@ -19,7 +19,7 @@ class SCAuthController extends Controller
         }else{
             $user = User::where('username', $request['username'])->first();
             $user->tokens()->delete();
-            $token = $user->createToken($request->username."_auth_token")->plainTextToken;
+            $token = $user->createToken($request->username."_login_token")->plainTextToken;
             $role = $user->getRoleNames();
 
             if (sizeof($role) == 0) {
