@@ -30,5 +30,5 @@ Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::delete('delete-user/{id}', [UserController::class, 'deleteUser']);
     Route::put('change-password', [UserController::class, 'changePassword']);
     Route::post('logout', [SCAuthController::class, 'logout']);
-    Route::post('refresh-token', [SCAuthController::class, 'refresh']);
+    Route::get('refresh-token', [SCAuthController::class, 'refresh']);
 });
