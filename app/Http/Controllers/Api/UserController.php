@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Http\Requests\RegisterMassiveRequests;
+use App\Jobs\SendEmails;
 
 class UserController extends Controller
 {
@@ -94,8 +95,10 @@ class UserController extends Controller
                             $user->assignRole($r);
                             $user->save();
 
-                            $token = Str::random(64);
-                            Mail::to($user->email)->send(new RegisterMail($username, $ci_sin_formato, $token));
+                            // $token = Str::random(64);
+                            dispatch(new SendEmails($username, $ci_sin_formato, $user->email))->delay(now()->addSeconds(10));
+                            // dispatch(new SendEmails($username, $ci_sin_formato, $user->email))->afterResponse();
+                            // Mail::to($user->email)->send(new RegisterMail($username, $ci_sin_formato, $token));
 
                             return response()->json([
                                 "ok" => true,
@@ -179,8 +182,10 @@ class UserController extends Controller
                         array_push($userRoles, $r);
                     endif;
 
-                    $token = Str::random(64);
-                    Mail::to($user['email'])->send(new RegisterMail($username, $ci_sin_formato, $token));
+                    // $token = Str::random(64);
+                    // Mail::to($user['email'])->send(new RegisterMail($username, $ci_sin_formato, $token));
+                    // dispatch(new SendEmails($username, $ci_sin_formato, $user['email']))->afterResponse();
+                    dispatch(new SendEmails($username, $ci_sin_formato, $user['email']))->delay(now()->addSeconds(10));
                 }
             }
         }

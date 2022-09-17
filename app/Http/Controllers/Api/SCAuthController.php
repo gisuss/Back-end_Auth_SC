@@ -62,21 +62,19 @@ class SCAuthController extends Controller
         }
     }
 
-    public function refresh(Request $request) {
-        // $tokeni = $request->bearerToken();
-        // $id = $request->user()->id;
-        // $user = User::find($id);
-        // $request->user()->currentAccessToken()->delete();
+    public function refresh() {
+        $id = auth()->id();
+        $user = User::find($id);
         // $user->tokens()->delete();
-        $token = $request->user()->createToken($request->user()->username."_auth_token")->plainTextToken;
-        $role = $request->user()->getRoleNames();
+        $token = $user->createToken($user->username."_auth_token")->plainTextToken;
+        $role = $user->getRoleNames();
 
         if (sizeof($role) == 0) {
             return response()->json([
                 "ok" => true,
                 "message" => "Token refrescado Exitosamente.",
-                "uuid" => $request->user()->id,
-                "identification" => $request->user()->identification,
+                "uuid" => $user()->id,
+                "identification" => $user()->identification,
                 "role" => NULL,
                 "token" => $token,
             ], 200);
@@ -84,8 +82,8 @@ class SCAuthController extends Controller
             return response()->json([
                 "ok" => true,
                 "message" => "Token refrescado Exitosamente.",
-                "uuid" => $request->user()->id,
-                "identification" => $request->user()->identification,
+                "uuid" => $user()->id,
+                "identification" => $user()->identification,
                 "role" => $role[0],
                 "token" => $token,
             ], 200);

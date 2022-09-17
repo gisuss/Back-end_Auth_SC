@@ -6,7 +6,7 @@ Estás recibiendo este email porque se ha detectado un registro de nuevo usuario
 
 Tus datos de inicio de sesión son los siguientes:
 @component('mail::table')
-| Username      | Password      |
+| Usuario      | Contraseña      |
 | :-------------: |:-------------:|
 | {{$username}}     | {{$pass}}       |
 @endcomponent
