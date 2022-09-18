@@ -1,8 +1,8 @@
 @component('mail::message')
-# ¡Saludos!<br>
+# ¡Saludos, {{$name}}!<br>
 Te damos la bienvenida al Sistema de Gestión del Servicio Comunitario de la Facyt.<br>
 
-Estás recibiendo este email porque se ha detectado un registro de nuevo usuario con tu dirección de Correo electrónico.
+Estás recibiendo este email porque se ha detectado un registro de nuevo usuario con tu dirección de correo electrónico.
 
 Tus datos de inicio de sesión son los siguientes:
 @component('mail::table')
@@ -11,7 +11,7 @@ Tus datos de inicio de sesión son los siguientes:
 | {{$username}}     | {{$pass}}       |
 @endcomponent
 
-Y si llegas a olvidar tu contraseña, la podrás recuperar a través de este correo.
+Y si llegas a olvidar tu contraseña, podrás recuperarla a través de este correo.
 
 Saludos, y que estés bien,<br>
 {{ config('app.name') }}

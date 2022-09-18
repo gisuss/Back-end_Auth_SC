@@ -18,17 +18,19 @@ class SendEmails implements ShouldQueue
     public $username;
     public $password;
     public $mail;
+    public $name;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($name, $cedula, $email)
+    public function __construct($name, $username, $cedula, $email)
     {
-        $this->username = $name;
+        $this->username = $username;
         $this->password = $cedula;
         $this->mail = $email;
+        $this->name = $name;
     }
 
     /**
@@ -38,6 +40,6 @@ class SendEmails implements ShouldQueue
      */
     public function handle()
     {
-        Mail::to($this->mail)->queue(new RegisterMail($this->username, $this->password));
+        Mail::to($this->mail)->queue(new RegisterMail($this->name, $this->username, $this->password));
     }
 }

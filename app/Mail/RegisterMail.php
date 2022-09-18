@@ -13,16 +13,20 @@ class RegisterMail extends Mailable
 
     public $username;
     public $password;
+    public $name;
+    public $subject;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($name, $cedula)
+    public function __construct($name, $username, $cedula)
     {
-        $this->username = $name;
+        $this->name = $name;
+        $this->username = $username;
         $this->password = $cedula;
+        $this->subject = "Bienvenido ".$this->name.", al SGSC.";
         // $this->emailConfirmationUrl = "http://localhost:4200/auth/confirm-email/".$token;
     }
 
@@ -34,8 +38,9 @@ class RegisterMail extends Mailable
     public function build()
     {
         return $this->from('example@example.com')
-                    ->subject("Bienvenido")
+                    ->subject($this->subject)
                     ->markdown('mails.register',    ['username' => $this->username,
-                                                    'pass' => $this->password]);
+                                                    'pass' => $this->password,
+                                                    'name' => $this->name]);
     }
 }

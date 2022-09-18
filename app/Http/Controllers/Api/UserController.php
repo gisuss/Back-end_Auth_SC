@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use Carbon\Carbon;
 use App\Models\User;
+use App\Jobs\SendEmails;
+use App\Mail\RegisterMail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
 use App\Http\Requests\RegisterMassiveRequests;
-use App\Jobs\SendEmails;
 
 class UserController extends Controller
 {
@@ -71,6 +73,7 @@ class UserController extends Controller
                         }else{
                             //GENERANDO USERNAME
                             $i = 1;
+                            $nombre = explode(" ", $first_name);
                             $first_name = Str::lower($first_name);
                             $last_name = Str::lower($last_name);
                             $apellido = explode(" ", $last_name);
@@ -108,9 +111,8 @@ class UserController extends Controller
                             $user->save();
 
                             // $token = Str::random(64);
-                            dispatch(new SendEmails($username, $ci_sin_formato, $email))->delay(now()->addSeconds(10));
-                            // dispatch(new SendEmails($username, $ci_sin_formato, $user->email))->afterResponse();
-                            // Mail::to($user->email)->send(new RegisterMail($username, $ci_sin_formato, $token));
+                            dispatch(new SendEmails($nombre[0], $username, $ci_sin_formato, $user['email']))->delay(now()->addSeconds(10));
+                            // Mail::to($user->email)->send(new RegisterMail($nombre[0], $username, $ci_sin_formato));
 
                             return response()->json([
                                 "ok" => true,
@@ -130,20 +132,21 @@ class UserController extends Controller
 
         $usersInput = $validated['users'];
         $usersOutput = [];
-        $userErrors = [];
         $userRoles = [];
         $usernames = [];
-        $pos = 1;
+
+        $users = DB::table('users')->select('username')->get();
+        foreach ($users as $user) {
+            $usernames[] = $user->username;
+        }
 
         foreach ($usersInput as $datum) {
-            $pos += 1;
-            $first_name = ucwords(Str::lower(trim(preg_replace('/[^a-z" "]/i', '', $datum['first_name']))));
-            $last_name = ucwords(Str::lower(trim(preg_replace('/[^a-z" "]/i', '', $datum['last_name']))));
+            $first_name = self::eliminar_tildes($datum['first_name']);
+            $last_name = self::eliminar_tildes($datum['last_name']);
+            $first_name = ucwords(Str::lower(trim(preg_replace('/[^a-zA-Z" "]/i', '', $first_name))));
+            $last_name = ucwords(Str::lower(trim(preg_replace('/[^a-zA-Z" "]/i', '', $last_name))));
             $email = trim(Str::lower($datum['email']));
-            if (($first_name == "") || ($last_name == "") || (DB::table('users')->where('email', $email)->exists())) {
-                //ALMACENAR INDICE DE USUARIO NO AGREGADO
-                $userErrors[] = $pos;
-            }else{
+            if (($first_name != "") and ($last_name != "") and (DB::table('users')->where('email', $email)->doesntExist())) {
                 //GENERANDO CEDULA VALIDA
                 $letra = Str::upper(substr(trim($datum['identification']), 0, 1));
                 if ($letra == 'V' || $letra == 'E' || $letra == 'J') {
@@ -154,12 +157,10 @@ class UserController extends Controller
                     $cedula = "V-".$ci_sin_formato;
                 }
 
-                if (($ci_sin_formato == "") || (DB::table('users')->where('identification', $cedula)->exists())) {
-                    //ALMACENAR INDICE DE USUARIO NO AGREGADO
-                    $userErrors[] = $pos;
-                }else{
+                if (($ci_sin_formato != "") and (DB::table('users')->where('identification', $cedula)->doesntExist())) {
                     //GENERANDO USERNAME
                     $i = 1;
+                    $nombre = explode(" ", $first_name);
                     $first_name = Str::lower($first_name);
                     $last_name = Str::lower($last_name);
                     $apellido = explode(" ", $last_name);
@@ -201,9 +202,8 @@ class UserController extends Controller
                     endif;
 
                     // $token = Str::random(64);
-                    // Mail::to($user['email'])->send(new RegisterMail($username, $ci_sin_formato, $token));
-                    // dispatch(new SendEmails($username, $ci_sin_formato, $user['email']))->afterResponse();
-                    dispatch(new SendEmails($username, $ci_sin_formato, $user['email']))->delay(now()->addSeconds(10));
+                    // Mail::to($email)->send(new RegisterMail($nombre[0], $username, $ci_sin_formato));
+                    dispatch(new SendEmails($nombre[0], $username, $ci_sin_formato, $email))->delay(now()->addSeconds(10));
                 }
             }
         }
@@ -224,30 +224,28 @@ class UserController extends Controller
 
             if ($b == $a) {
                 return response()->json([
-                    "ok" => true,
+                    "ok" => 1,
                     "message" => "Registro de Usuarios Completamente Exitoso.",
                     "users" => $usersOutput,
                 ], 200);
             }else{
                 if ($b == 0) {
                     return response()->json([
-                        "ok" => false,
-                        "message" => "Ha ocurrido un error en la entrada de datos, por favor valide la información.",
+                        "ok" => 2,
+                        "message" => "¡Ops! Algo ha salido mal, no se pudo registrar ningún usuario.",
                     ]);
                 }else{
                     if ($b >= 1) {
                         return response()->json([
-                            "ok" => true,
+                            "ok" => 3,
                             "message" => "Se registraron ".$b." / ".$a." nuevos usuarios.",
                             "users" => $usersOutput,
-                            "errors" => $userErrors,
                         ], 200);
                     }
                 }
             }
         }else{
             return response()->json([
-                "ok" => false,
                 "message" => "Fatal. Registro de Usuario Fallido.",
             ], 500);
         }
@@ -472,5 +470,46 @@ class UserController extends Controller
                 "message" => "Usuario No existe.",
             ]);
         }
+    }
+
+    public function eliminar_tildes($cadena){
+
+        //Codificamos la cadena en formato utf8 en caso de que nos de errores
+        // $cadena = utf8_encode($cadena);
+    
+        //Ahora reemplazamos las letras
+        $cadena = str_replace(
+            array('á', 'à', 'ä', 'â', 'ª', 'Á', 'À', 'Â', 'Ä'),
+            array('a', 'a', 'a', 'a', 'a', 'A', 'A', 'A', 'A'),
+            $cadena
+        );
+    
+        $cadena = str_replace(
+            array('é', 'è', 'ë', 'ê', 'É', 'È', 'Ê', 'Ë'),
+            array('e', 'e', 'e', 'e', 'E', 'E', 'E', 'E'),
+            $cadena );
+    
+        $cadena = str_replace(
+            array('í', 'ì', 'ï', 'î', 'Í', 'Ì', 'Ï', 'Î'),
+            array('i', 'i', 'i', 'i', 'I', 'I', 'I', 'I'),
+            $cadena );
+    
+        $cadena = str_replace(
+            array('ó', 'ò', 'ö', 'ô', 'Ó', 'Ò', 'Ö', 'Ô'),
+            array('o', 'o', 'o', 'o', 'O', 'O', 'O', 'O'),
+            $cadena );
+    
+        $cadena = str_replace(
+            array('ú', 'ù', 'ü', 'û', 'Ú', 'Ù', 'Û', 'Ü'),
+            array('u', 'u', 'u', 'u', 'U', 'U', 'U', 'U'),
+            $cadena );
+    
+        $cadena = str_replace(
+            array('ñ', 'Ñ', 'ç', 'Ç'),
+            array('n', 'N', 'c', 'C'),
+            $cadena
+        );
+    
+        return $cadena;
     }
 }
