@@ -7,10 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Mail\RegisterMail;
-use App\Mail\massiveRegisterMail;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Http\Requests\RegisterMassiveRequests;
@@ -35,7 +32,8 @@ class UserController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }else{
-            if (DB::table('users')->where('email', trim(Str::lower($request->email)))->exists()) {
+            $email = trim(Str::lower($request->email));
+            if (DB::table('users')->where('email', $email)->exists()) {
                 return response()->json([
                     "ok" => false,
                     "message" => "Registro de Usuario No Exitoso, el email suministrado ya existe.",
@@ -73,30 +71,44 @@ class UserController extends Controller
                         }else{
                             //GENERANDO USERNAME
                             $i = 1;
+                            $first_name = Str::lower($first_name);
+                            $last_name = Str::lower($last_name);
                             $apellido = explode(" ", $last_name);
-                            $username = substr(Str::lower($first_name), 0, $i).Str::lower($apellido[0]);
+                            $username = substr($first_name, 0, $i).$apellido[0];
                             while (DB::table('users')->where('username', $username)->exists()) {
                                 $i += 1;
                                 if ($i <= 2) {
-                                    $username = substr(Str::lower($first_name), 0, $i).Str::lower($apellido[0]);
+                                    $username = substr($first_name, 0, $i).$apellido[0];
                                 }else{
                                     $j = $i-1;
-                                    $username = substr(Str::lower($first_name), 0, 2).Str::lower($apellido[0]).$j;
+                                    $username = substr($first_name, 0, 2).$apellido[0].$j;
                                 }
                             }
 
                             $user = new User();
-                            $user->email = trim(Str::lower($request->email));
+                            $user->email = $email;
                             $user->identification = $cedula;
                             $user->active = isset($request->active) ? $request->active : 1;
                             $user->username = $username;
                             $user->password = Hash::make($ci_sin_formato);
                             $r = isset($request->role) ? $request->role : "student";
+                            trim(Str::lower($r));
+
+                            if ($r == "coordinador" || $r == "coordinator"):
+                                $r = "coordinator";
+                            elseif ($r == "tutor"):
+                                $r = "tutor";
+                            elseif ($r == "estudiante" || $r == "student"):
+                                $r = "student";
+                            else:
+                                $r = "student";
+                            endif;
+
                             $user->assignRole($r);
                             $user->save();
 
                             // $token = Str::random(64);
-                            dispatch(new SendEmails($username, $ci_sin_formato, $user->email))->delay(now()->addSeconds(10));
+                            dispatch(new SendEmails($username, $ci_sin_formato, $email))->delay(now()->addSeconds(10));
                             // dispatch(new SendEmails($username, $ci_sin_formato, $user->email))->afterResponse();
                             // Mail::to($user->email)->send(new RegisterMail($username, $ci_sin_formato, $token));
 
@@ -120,13 +132,15 @@ class UserController extends Controller
         $usersOutput = [];
         $userErrors = [];
         $userRoles = [];
+        $usernames = [];
         $pos = 1;
 
         foreach ($usersInput as $datum) {
             $pos += 1;
-            $first_name = ucwords(Str::lower(trim(preg_replace('/[^a-z" "]/i', '', $datum['first_name']), ' ')));
-            $last_name = ucwords(Str::lower(trim(preg_replace('/[^a-z" "]/i', '', $datum['last_name']), ' ')));
-            if (($first_name == "") || ($last_name == "") || (DB::table('users')->where('email', trim(Str::lower($datum['email'])))->exists())) {
+            $first_name = ucwords(Str::lower(trim(preg_replace('/[^a-z" "]/i', '', $datum['first_name']))));
+            $last_name = ucwords(Str::lower(trim(preg_replace('/[^a-z" "]/i', '', $datum['last_name']))));
+            $email = trim(Str::lower($datum['email']));
+            if (($first_name == "") || ($last_name == "") || (DB::table('users')->where('email', $email)->exists())) {
                 //ALMACENAR INDICE DE USUARIO NO AGREGADO
                 $userErrors[] = $pos;
             }else{
@@ -146,20 +160,24 @@ class UserController extends Controller
                 }else{
                     //GENERANDO USERNAME
                     $i = 1;
+                    $first_name = Str::lower($first_name);
+                    $last_name = Str::lower($last_name);
                     $apellido = explode(" ", $last_name);
-                    $username = substr(Str::lower($first_name), 0, $i).Str::lower($apellido[0]);
-                    while (DB::table('users')->where('username', $username)->exists()) {
+                    $username = substr($first_name, 0, $i).$apellido[0];
+                    while (in_array($username, $usernames)) {
                         $i += 1;
                         if ($i <= 2) {
-                            $username = substr(Str::lower($first_name), 0, $i).Str::lower($apellido[0]);
+                            $username = substr($first_name, 0, $i).$apellido[0];
                         }else{
                             $j = $i-1;
-                            $username = substr(Str::lower($first_name), 0, 2).Str::lower($apellido[0]).$j;
+                            $username = substr($first_name, 0, 2).$apellido[0].$j;
                         }
                     }
 
+                    $usernames[] = $username;
+
                     $user = [];
-                    $user['email'] = trim(Str::lower($datum['email']));
+                    $user['email'] = $email;
                     $user['identification'] = $cedula;
                     $user['username'] = $username;
                     $user['password'] = hash::make($ci_sin_formato);
@@ -178,7 +196,7 @@ class UserController extends Controller
                         $r = "student";
                         array_push($userRoles, $r);
                     else:
-                        $r = NULL;
+                        $r = "student";
                         array_push($userRoles, $r);
                     endif;
 
@@ -288,10 +306,10 @@ class UserController extends Controller
 
     public function edituserProfile(Request $request, $id) {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email|string|unique:users',
             'identification' => 'required|string|min:6',
-            'role' => 'required',
-            'active' => 'required'
+            'role' => 'nullable',
+            'active' => 'nullable'
         ]);
 
         if ($validator->fails()) {
@@ -310,14 +328,14 @@ class UserController extends Controller
                     if (DB::table('users')->where('email', $request->email)->exists()) {
                         return response()->json([
                             "ok" => false,
-                            "message" => "Registro de Usuario No Exitoso, el email suministrado ya existe.",
+                            "message" => "El email suministrado ya existe.",
                         ], 422);
                     }
                 }
                 $user->email = $request->email;
 
                 // VALIDANDO STATUS DE ACTIVIDAD
-                if ($request->active != $user->active) {
+                if (isset($request->active) || ($request->active != $user->active)) {
                     $user->active = $request->active;
                 }
 
@@ -341,7 +359,27 @@ class UserController extends Controller
                         "message" => "La Cédula de Identidad suministrada ya existe.",
                     ], 422);
                 }else{
+                    if ($ci_sin_formato == "") {
+                        return response()->json([
+                            "ok" => false,
+                            "message" => "La Cédula de Identidad suministrada es errónea.",
+                        ], 422);
+                    }
                     $user->identification = $cedula;
+                }
+
+                if (isset($request->role)) {
+                    $r = $request->role;
+                    trim(Str::lower($r));
+                    if ($r == "coordinador" || $r == "coordinator"):
+                        $r = "coordinator";
+                    elseif ($r == "tutor"):
+                        $r = "tutor";
+                    elseif ($r == "estudiante" || $r == "student"):
+                        $r = "student";
+                    else:
+                        $r = "student";
+                    endif;
                 }
         
                 $user->update();
@@ -362,7 +400,7 @@ class UserController extends Controller
                 }else{
                     if ($request->role != $role[0]) {
                         $user->removeRole($role[0]);
-                        $user->assignRole($request->role);
+                        $user->assignRole($r);
                         unset($role);
                         $role = $user->getRoleNames();
                     }
