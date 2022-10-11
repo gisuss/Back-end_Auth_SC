@@ -24,11 +24,14 @@ class RegisterMassiveRequests extends FormRequest
     public function messages()
     {
         return [
-            'users.*.first_name.required' => 'el campo de nombre es requerido.',
-            'users.*.last_name.required' => 'el campo de apellido es requerido.',
-            'users.*.email.required' => 'el campo de email es requerido.',
-            'users.*.identification.required' => 'el campo de cédula es requerido.',
-            'users.*.email.email' => 'el campo de email no es válido.',
+            'users.*.first_name.required' => 'El campo de nombre es requerido.',
+            'users.*.last_name.required' => 'El campo de apellido es requerido.',
+            'users.*.email.required' => 'El campo de email es requerido.',
+            'users.*.identification.required' => 'El campo de cédula es requerido.',
+            'users.*.email.email' => 'El valor del campo email no es válido.',
+            'users.*.first_name.min' => 'El valor del campo nombre debe ser mayor a 4 caracteres.',
+            'users.*.last_name.min' => 'El valor del campo apellido debe ser mayor a 4 caracteres.',
+            'users.*.identification.min' => 'El valor del campo cédula debe ser mayor a 6 dígitos.',
         ];
     }
 

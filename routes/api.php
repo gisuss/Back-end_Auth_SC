@@ -26,8 +26,8 @@ Route::put('reset-password', [newResetPasswordController::class, 'resetPassword'
 
 Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::get('user-profile', [UserController::class, 'userProfile']);
-    Route::put('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
-    Route::delete('delete-user/{id}', [UserController::class, 'deleteUser']);
+    Route::put('edit-user-profile', [UserController::class, 'edituserProfile']);
+    Route::delete('delete-user', [UserController::class, 'deleteUser']);
     Route::put('change-password', [UserController::class, 'changePassword']);
     Route::post('logout', [SCAuthController::class, 'logout']);
     Route::get('refresh-token', [SCAuthController::class, 'refresh']);
