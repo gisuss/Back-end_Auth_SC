@@ -39,7 +39,7 @@ class newResetPasswordController extends Controller
 
             if ($check->exists()) {
                 $user = $check->first();
-                if (Hash::check($request->password, $request->confirm_password)) {
+                if ($request->password === $request->confirm_password) {
                     $user->password = Hash::make($request->password);
                     $user->update();
 
