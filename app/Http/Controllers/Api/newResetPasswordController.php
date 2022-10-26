@@ -35,30 +35,15 @@ class newResetPasswordController extends Controller
             $email = $result->email;
             DB::table('password_resets')->where('email', $email)->delete();
 
-            $check = User::where('email', $email);
+            $user = User::where('email', $email);
+            $user->update([
+                'password' => Hash::make($request->password)
+            ]);
 
-            if ($check->exists()) {
-                $user = $check->first();
-                if ($request->password === $request->confirm_password) {
-                    $user->password = Hash::make($request->password);
-                    $user->update();
-
-                    return response()->json([
-                        "ok" => true,
-                        "message" => "La contraseña ha sido cambiada con éxito.",
-                    ]);
-                }else{
-                    return response()->json([
-                        "ok" => false,
-                        "message" => "Las contraseñas suministradas no coinciden.",
-                    ]);
-                }
-            }else{
-                return response()->json([
-                    "ok" => false,
-                    "message" => "Usuario no encontrado.",
-                ]);
-            }
+            return response()->json([
+                "ok" => true,
+                "message" => "La contraseña ha sido cambiada con éxito.",
+            ]);
         }else{
             return response()->json([
                 "ok" => false,

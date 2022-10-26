@@ -11,7 +11,7 @@ Este enlace para restablecer la contraseña caduca en 60 minutos.
 Si no has solicitado un cambio de contraseña, puedes ignorar o eliminar este e-mail.
 
 Saludos, y que estés bien,<br>
-SGSC
+{{ config('app.name') }}
 
 <hr>
 <br>

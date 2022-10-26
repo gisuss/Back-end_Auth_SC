@@ -197,7 +197,6 @@ class UserController extends Controller
                         $user['identification'] = $cedula;
                         $user['username'] = $username;
                         $user['password'] = hash::make($ci_sin_formato);
-                        $user['email_verified_at'] = Carbon::now();
                         
                         $usersOutput[] = $user;
     
