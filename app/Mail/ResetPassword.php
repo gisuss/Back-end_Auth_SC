@@ -20,7 +20,6 @@ class ResetPassword extends Mailable
      */
     public function __construct($pin)
     {
-        // $this->ruta = url('/verify_token/'.$pin);
         $this->ruta = "http://localhost:4200/auth/change-password/".$pin;
     }
 
@@ -31,8 +30,8 @@ class ResetPassword extends Mailable
      */
     public function build()
     {
-        return $this->from('example@example.com')
-                    ->subject("Reset Password")
+        return $this->from('facytservc@gmail.com')
+                    ->subject("Reseteo de Contraseña")
                     ->markdown('mails.password', ['ruta' => $this->ruta]);
     }
 }

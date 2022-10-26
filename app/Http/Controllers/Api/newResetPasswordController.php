@@ -21,20 +21,17 @@ class newResetPasswordController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'ok' => false,
-                'message' => $validator->errors(),
+                "ok" => false,
+                "message" => $validator->errors(),
             ], 422);
         }
 
         //VERIFICACION DE TOKEN RECIBIDO POR LOS HEADERS
         $token = $request->header('Authorization');
-        // $arr = [];
-        // $arr = array_merge($arr, $this->verifyPin($token));
-        $res = $this->verifyPin($token);
 
-        if ($res) {
+        if (self::verifyPin($token)) {
             //ELIMINO EL TOKEN DE LA TABLA password_resets
-            $result = DB::table('password_resets')->where(['token' => $token])->first();
+            $result = DB::table('password_resets')->where('token', $token)->first();
             $email = $result->email;
             DB::table('password_resets')->where('email', $email)->delete();
 
@@ -44,36 +41,27 @@ class newResetPasswordController extends Controller
             ]);
 
             return response()->json([
-                'ok' => true,
-                'message' => "La contraseña ha sido cambiada con éxito.",
+                "ok" => true,
+                "message" => "La contraseña ha sido cambiada con éxito.",
             ]);
         }else{
             return response()->json([
-                'ok' => false,
-                'message' => "Token Inválido o Caducado.",
+                "ok" => false,
+                "message" => "Token Inválido o Caducado.",
             ]);
         }
     }
 
     public function verifyPin($token) {
+        $bool = false;
         $check = DB::table('password_resets')->where('token', $token);
-
+        
         if ($check->exists()) {
             $difference = Carbon::now()->diffInSeconds($check->first()->created_at);
-            if ($difference > 3600) {
-                $mensaje = "Token Expirado. Recuerde que dispone de 60 minutos para culminar su proceso de reseteo de contraseña.";
-                $bool = false;
-            }else{
-                $mensaje = "Token Válido.";
+            if ($difference <= 3600) {
                 $bool = true;
             }
-        }else{
-            $mensaje = "Token Inválido.";
-            $bool = false;
         }
-
-        $array = [];
-        array_push($array, $bool, $mensaje);
         
         return $bool;
     }

@@ -19,7 +19,7 @@ class SCAuthController extends Controller
         }else{
             $user = User::where('username', $request['username'])->first();
             $user->tokens()->delete();
-            $token = $user->createToken($request->username."_auth_token")->plainTextToken;
+            $token = $user->createToken($request->username."_login_token")->plainTextToken;
             $role = $user->getRoleNames();
 
             if (sizeof($role) == 0) {
@@ -27,7 +27,7 @@ class SCAuthController extends Controller
                     "ok" => true,
                     "message" => "Usuario Logeado Exitosamente.",
                     "uuid" => $user->id,
-                    "identification_document" => $user->identification_document,
+                    "identification" => $user->identification,
                     "role" => NULL,
                     "token" => $token,
                 ], 200);
@@ -36,7 +36,7 @@ class SCAuthController extends Controller
                     "ok" => true,
                     "message" => "Usuario Logeado Exitosamente.",
                     "uuid" => $user->id,
-                    "identification_document" => $user->identification_document,
+                    "identification" => $user->identification,
                     "role" => $role[0],
                     "token" => $token,
                 ], 200);
@@ -45,45 +45,45 @@ class SCAuthController extends Controller
     }
 
     public function logout() {
-            $id = auth()->id();
-            if (isset($id)) {
-                $user = User::find($id);
-                $user->tokens()->delete();
+        $id = auth()->id();
+        if (isset($id)) {
+            $user = User::find($id);
+            $user->tokens()->delete();
 
-                return response()->json([
-                    "ok" => true,
-                    "message" => "Cierre de Sesión Exitoso.",
-                ], 200);
-            }else{
-                return response()->json([
-                    "ok" => false,
-                    "message" => "Cierre de Sesión Fallido.",
-                ], 401);
-            }
+            return response()->json([
+                "ok" => true,
+                "message" => "Cierre de Sesión Exitoso.",
+            ], 200);
+        }else{
+            return response()->json([
+                "ok" => false,
+                "message" => "Cierre de Sesión Fallido.",
+            ], 401);
+        }
     }
 
     public function refresh() {
         $id = auth()->id();
         $user = User::find($id);
-        $user->tokens()->delete();
-        $token = $user->createToken($user->username."_auth_token")->plainTextToken;
+        // $user->tokens()->delete();
+        $token = $user->createToken($user->username."_refresh_token")->plainTextToken;
         $role = $user->getRoleNames();
 
         if (sizeof($role) == 0) {
             return response()->json([
                 "ok" => true,
-                "message" => "Usuario Logeado Exitosamente.",
+                "message" => "Token refrescado Exitosamente.",
                 "uuid" => $user->id,
-                "identification_document" => $user->identification_document,
+                "identification" => $user->identification,
                 "role" => NULL,
                 "token" => $token,
             ], 200);
         }else{
             return response()->json([
                 "ok" => true,
-                "message" => "Usuario Logeado Exitosamente.",
+                "message" => "Token refrescado Exitosamente.",
                 "uuid" => $user->id,
-                "identification_document" => $user->identification_document,
+                "identification" => $user->identification,
                 "role" => $role[0],
                 "token" => $token,
             ], 200);
