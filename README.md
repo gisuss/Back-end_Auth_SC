@@ -104,36 +104,27 @@ Route::put('reset-password', [newResetPasswordController::class, 'resetPassword'
 
 Route::group( ['middleware' => ['auth:sanctum']], function() {
     Route::get('user-profile', [UserController::class, 'userProfile']);
-    Route::put('edit-user-profile/{id}', [UserController::class, 'edituserProfile']);
-    Route::delete('delete-user/{id}', [UserController::class, 'deleteUser']);
+    Route::put('edit-user-profile', [UserController::class, 'edituserProfile']);
+    Route::delete('delete-user', [UserController::class, 'deleteUser']);
     Route::put('change-password', [UserController::class, 'changePassword']);
     Route::post('logout', [SCAuthController::class, 'logout']);
     Route::get('refresh-token', [SCAuthController::class, 'refresh']);
 });
 ```
-Cada endpoint responde a las urls dadas a continuacion como ejemplos:
-```PHP
-http://127.0.0.1:8000/api/register
-http://127.0.0.1:8000/api/login
-http://127.0.0.1:8000/api/user-profile
-http://127.0.0.1:8000/api/edit-user-profile/1
-http://127.0.0.1:8000/api/logout
-```
 
-## 9. Configuración de correo de pruebas [Mailtrap.io](https://mailtrap.io/home)
+## 9. Configuración de correo de pruebas [gmail](https://google.com)
 
-Ingresan al sitio [Mailtrap.io](https://mailtrap.io/home) y se crean una cuenta (pueden logearse usando su cuenta de github), luego seleccionan "Laravel 7+" en la pestaña "SMTP Settings" > "Integrations" y copian al portapapeles la configuración de su servidor de correos de pruebas:
+Ingresan al archivo de configuración **.env** y reemplazan las siguientes líneas en la seccion dedicada a los MAILS:
 ```PHP
 MAIL_MAILER=smtp
-MAIL_HOST=smtp.mailtrap.io
-MAIL_PORT=2525
-MAIL_USERNAME=xxxxxxxxxxx
-MAIL_PASSWORD=xxxxxxxxxxx
-MAIL_ENCRYPTION=tls
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_USERNAME=facytservc@gmail.com
+MAIL_PASSWORD=ksxcogcmaolunogu
+MAIL_ENCRYPTION=ssl
+MAIL_FROM_ADDRESS=facytservc@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
 ```
-**OJO: Esto es solo un ejemplo**
-
-Se dirigen al archivo **.env** ubicado en la raíz del proyecto y en la sección de "MAIL" reemplazan la configuración por defecto con la configuración que copiaron al portapapeles en el paso anterior. Listo, su servidor de pruebas está listo para gestionar solicitudes de emails.
 
 ## 10. Limpiar caché de rutas y configuraciones previas
 
@@ -153,3 +144,17 @@ Para limpiar la route cache
 php artisan cache:clear
 ```
 Para limpiar la normal cache
+
+## 11. Ejecutar un demonio para la ejecución de tareas en segundo plano
+
+Primeramente ingresan al archivo de configuración **.env**, buscan la linea "QUEUE_CONNECTION" y cambian por el siguiente valor:
+```PHP
+QUEUE_CONNECTION=database
+```
+
+Luego en otra ventana de la terminal ejecutar el siguiente comando y dejarlo correr junto con el servidor:
+```PHP
+php artisan queue:work
+```
+
+Esto se ejecutará en segundo plano y agilizará las respuestas de los endpoints ya que las tareas de envío de email se ejecutarán posteriormente en segundo plano sin afectar la ejecución sel servidor.
