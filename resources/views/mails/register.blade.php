@@ -14,7 +14,7 @@ Tus datos de inicio de sesión son los siguientes:
 Y si llegas a olvidar tu contraseña, podrás recuperarla a través de este correo.
 
 Saludos, y que estés bien,<br>
-{{ config('app.name') }}
+SGSC
 
 <hr>
 <br>

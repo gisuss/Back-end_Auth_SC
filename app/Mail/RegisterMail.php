@@ -37,7 +37,7 @@ class RegisterMail extends Mailable
      */
     public function build()
     {
-        return $this->from('example@example.com')
+        return $this->from('facytservc@gmail.com')
                     ->subject($this->subject)
                     ->markdown('mails.register',    ['username' => $this->username,
                                                     'pass' => $this->password,

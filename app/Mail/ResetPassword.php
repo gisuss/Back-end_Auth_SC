@@ -30,7 +30,7 @@ class ResetPassword extends Mailable
      */
     public function build()
     {
-        return $this->from('example@example.com')
+        return $this->from('facytservc@gmail.com')
                     ->subject("Reseteo de Contraseña")
                     ->markdown('mails.password', ['ruta' => $this->ruta]);
     }
