@@ -51,10 +51,9 @@ class UserController extends Controller
             }else{
                 //GENERANDO CEDULA VALIDA
                 $letra = Str::upper(substr(trim($validated['identification']), 0, 1));
-                if ($letra != 'V' || $letra != 'E' || $letra != 'J') {
+                if ($letra != 'V' || $letra != 'E' || $letra != 'J' || $letra != 'G') {
                     $letra = "V";
                 }
-                
                 $ci_sin_formato = preg_replace('/[^0-9]/i', '', $validated['identification']);
                 if ($ci_sin_formato == "") {
                     return response()->json([
@@ -166,7 +165,7 @@ class UserController extends Controller
             if (($first_name != "") and ($last_name != "") and (DB::table('users')->where('email', $email)->doesntExist())) {
                 //GENERANDO CEDULA VALIDA
                 $letra = Str::upper(substr(trim($datum['identification']), 0, 1));
-                if ($letra != 'V' || $letra != 'E' || $letra != 'J') {
+                if ($letra != 'V' || $letra != 'E' || $letra != 'J' || $letra != 'G') {
                     $letra = "V";
                 }
                 $ci_sin_formato = preg_replace('/[^0-9]/i', '', $datum['identification']);
