@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class UsersTestSeeder extends Seeder
 {
@@ -21,6 +22,7 @@ class UsersTestSeeder extends Seeder
             'active' => '1',
             'username' => 'student',
             'password'  =>  Hash::make('12345678'),
+            'email_verified_at' => Carbon::now(),
         ]);
         $user1->assignRole('student');
 
@@ -30,6 +32,7 @@ class UsersTestSeeder extends Seeder
             'active' => '1',
             'username' => 'tutor',
             'password'  =>  Hash::make('12345678'),
+            'email_verified_at' => Carbon::now(),
         ]);
         $user2->assignRole('tutor');
     }
