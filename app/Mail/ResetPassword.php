@@ -20,7 +20,7 @@ class ResetPassword extends Mailable
      */
     public function __construct($pin)
     {
-        $this->ruta = "http://localhost:4200/auth/change-password/".$pin;
+        $this->ruta = "https://localhost:4200/auth/change-password/".$pin;
     }
 
     /**
