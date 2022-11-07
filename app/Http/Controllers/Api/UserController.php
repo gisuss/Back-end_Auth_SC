@@ -61,6 +61,9 @@ class UserController extends Controller
                         "message" => "El formato de la Cédula de Identidad suministrada es erróneo.",
                     ], 422);
                 }else{
+                    if (strlen($ci_sin_formato) < 8) {
+                        $ci_sin_formato = str_pad($ci_sin_formato, 8, "0", STR_PAD_LEFT);
+                    }
                     $cedula = $letra."-".$ci_sin_formato;
                     if (DB::table('users')->where('identification', $cedula)->exists()) {
                         return response()->json([
@@ -169,6 +172,9 @@ class UserController extends Controller
                     $letra = "V";
                 }
                 $ci_sin_formato = preg_replace('/[^0-9]/i', '', $datum['identification']);
+                if (strlen($ci_sin_formato) < 8) {
+                    $ci_sin_formato = str_pad($ci_sin_formato, 8, "0", STR_PAD_LEFT);
+                }
                 $cedula = $letra."-".$ci_sin_formato;
                 if (($ci_sin_formato != "") and (in_array($cedula, $Identifications) == false)) {
                     $Identifications[] = $cedula;
