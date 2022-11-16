@@ -144,28 +144,3 @@ Para limpiar la route cache
 php artisan cache:clear
 ```
 Para limpiar la normal cache
-
-## 11. Ejecutar un demonio para la ejecución de tareas en segundo plano
-
-Primeramente ingresan al archivo de configuración **.env**, buscan la linea "QUEUE_CONNECTION" y cambian por el siguiente valor:
-```PHP
-QUEUE_CONNECTION=sqs
-```
-
-Luego ubicar en el mismo archivo **.env** las siguientes keys y configurarlas como se muestra:
-```PHP
-AWS_ACCESS_KEY_ID=AKIAWHDHEKK7PHTNNVWA
-AWS_SECRET_ACCESS_KEY=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
-AWS_DEFAULT_REGION=us-east-1
-SQS_PREFIX=https://sqs.us-east-1.amazonaws.com/427565535934
-SQS_QUEUE=default
-AWS_BUCKET=
-AWS_USE_PATH_STYLE_ENDPOINT=false
-```
-
-Luego en otra ventana de la terminal ejecutar el siguiente comando y dejarlo correr junto con el servidor:
-```PHP
-php artisan queue:work sqs
-```
-
-Esto se ejecutará en segundo plano y agilizará las respuestas de los endpoints ya que las tareas de envío de email se ejecutarán posteriormente en segundo plano sin afectar la ejecución sel servidor.
