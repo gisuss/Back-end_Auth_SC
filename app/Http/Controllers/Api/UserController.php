@@ -5,16 +5,19 @@ namespace App\Http\Controllers\Api;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Jobs\SendEmails;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RegisterMail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Requests\RegisterMassiveRequests;
 use App\Http\Requests\EditUserRequests;
-use App\Http\Requests\ChangePasswordUserRequests;
 use App\Http\Requests\DeleteUserRequests;
 use App\Http\Requests\RegisterUserRequests;
+use App\Http\Requests\RegisterMassiveRequests;
+use App\Http\Requests\ChangePasswordUserRequests;
+
 
 class UserController extends Controller
 {
@@ -123,8 +126,8 @@ class UserController extends Controller
                         $user->save();
 
                         // $token = Str::random(64);
-                        dispatch(new SendEmails($nombre[0], $username, $ci_sin_formato, $user['email']))->delay(now()->addSeconds(10));
-                        // Mail::to($user->email)->send(new RegisterMail($nombre[0], $username, $ci_sin_formato));
+                        // dispatch(new SendEmails($nombre[0], $username, $ci_sin_formato, $user['email']))->delay(now()->addSeconds(10));
+                        Mail::to($user->email)->send(new RegisterMail($nombre[0], $username, $ci_sin_formato));
 
                         return response()->json([
                             "ok" => true,

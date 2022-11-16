@@ -11,6 +11,11 @@ Tus datos de inicio de sesión son los siguientes:
 | {{$username}}     | {{$pass}}       |
 @endcomponent
 
+Ingresa al siguiente link para iniciar sesión
+@component('mail::button', ['url' => $linkpage])
+Inicio
+@endcomponent
+
 Y si llegas a olvidar tu contraseña, podrás recuperarla a través de este correo.
 
 Saludos, y que estés bien,<br>

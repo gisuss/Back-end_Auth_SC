@@ -15,6 +15,7 @@ class RegisterMail extends Mailable
     public $password;
     public $name;
     public $subject;
+    public $linkpage;
 
     /**
      * Create a new message instance.
@@ -27,7 +28,7 @@ class RegisterMail extends Mailable
         $this->username = $username;
         $this->password = $cedula;
         $this->subject = "Bienvenido ".$this->name.", al SGSC.";
-        // $this->emailConfirmationUrl = "http://localhost:4200/auth/confirm-email/".$token;
+        $this->linkpage = "https://serviciocomunitariofacyt.netlify.app/auth/login";
     }
 
     /**
@@ -41,6 +42,7 @@ class RegisterMail extends Mailable
                     ->subject($this->subject)
                     ->markdown('mails.register',    ['username' => $this->username,
                                                     'pass' => $this->password,
-                                                    'name' => $this->name]);
+                                                    'name' => $this->name,
+                                                    'link' => $this->linkpage]);
     }
 }
